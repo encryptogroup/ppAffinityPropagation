@@ -1,0 +1,147 @@
+import numpy as np
+import time
+
+n = 400
+features = 2
+iter = 6
+
+D = sint.Matrix(features,n)
+D.input_from(0)
+
+bl = sint.Matrix(features,n)
+bl.input_from(1)
+
+#lam = sfloat(0.5)
+preference = Array(1,sint)
+#initialize Similarity matrix
+S = Matrix(n,n,sint)
+@for_range(n)
+def f(i):
+    @for_range(n)
+    def f(j):
+        @for_range(features)
+        def f(k):
+            S[i][j] = (S[i][j] + (D[k][i]-D[k][j])*(D[k][i]-D[k][j]))
+            preference[0] = (preference[0]>S[i][j]).if_else(preference[0], S[i][j])
+        S[i][j] = sint(-1) * S[i][j]
+preference[0] = sint(-1) * preference[0]
+@for_range(n)
+def f(i):
+    S[i][i] = sint(preference[0])
+
+print_ln('preference: %s', preference[0].reveal())
+
+A = Matrix(n,n,sint)
+R = Matrix(n,n,sint)
+exemplarEach = Array(n,sint)
+@for_range(n)
+def f(i):
+    exemplarEach[i] = sint(-1)
+    @for_range(n)
+    def f(j):
+        A[i][j] = sint(0)
+        R[i][j] = sint(0)
+
+@for_range(iter)
+def f(it):
+    maxOfEachRow = Array(n, sint)
+    indecesOfMax = Array(n, sint)
+    Y = Array(n, sint)
+    oldR = Matrix(n,n,sint)
+    oldA = Matrix(n,n,sint)
+    AS = Matrix(n,n,sint)
+    @for_range(n)
+    def f(i):
+        maxOfEachRow[i] = sint(-1*(2**(64-1)-1))
+        indecesOfMax[i] = sint(0)
+        Y[i] = sint(-1*(2**(64-1)-1))
+        @for_range(n)
+        def f(j):
+            oldA[i][j] = A[i][j]
+            oldR[i][j] = R[i][j]
+            AS[i][j] = A[i][j] + S[i][j]
+    @for_range(n)
+    def f(i):
+        @for_range(n)
+        def f(j):
+            indecesOfMax[i] = (AS[i][j] > maxOfEachRow[i]).if_else(sint(j), indecesOfMax[i])
+            maxOfEachRow[i] = (AS[i][j]>maxOfEachRow[i]).if_else(AS[i][j],maxOfEachRow[i])
+    @for_range(n)
+    def f(i):
+        @for_range(n)
+        def f(j):
+            R[i][j] = S[i][j]-maxOfEachRow[i]
+    @for_range(n)
+    def f(i):
+        AS[i][indecesOfMax[i].reveal()] = sint(-1*(2**(64-1)-1))
+
+    @for_range(n)
+    def f(i):
+        @for_range(n)
+        def f(j):
+            Y[i] = (AS[i][j]>Y[i]).if_else(AS[i][j],Y[i])
+    @for_range(n)
+    def f(i):
+        R[i][indecesOfMax[i].reveal()] = S[i][indecesOfMax[i].reveal()]-Y[i]
+
+    RP = Matrix(n,n,sint)
+    AP = Matrix(n,n,sint)
+    sumR = Array(n, sint)
+    @for_range(n)
+    def f(i):
+        sumR[i] = sint(0)
+        @for_range(n)
+        def f(j):
+            RP[i][j] = (R[i][j]>sint(0)).if_else(R[i][j],sint(0))
+    @for_range(n)
+    def f(i):
+        RP[i][i] = R[i][i]
+    @for_range(n)
+    def f(i):
+        @for_range(n)
+        def f(j):
+            sumR[j] = sumR[j]+RP[i][j]
+    @for_range(n)
+    def f(i):
+        @for_range(n)
+        def f(j):
+            A[i][j] = sumR[j]-RP[i][j]
+    @for_range(n)
+    def f(i):
+        @for_range(n)
+        def f(j):
+            AP[i][j] = (A[i][j]<=sint(0)).if_else(A[i][j],sint(0))
+    @for_range(n)
+    def f(i):
+        AP[i][i] = A[i][i]
+    @for_range(n)
+    def f(i):
+        @for_range(n)
+        def f(j):
+            A[i][j] = AP[i][j]
+
+    
+E = Matrix(n,n,sint)
+@for_range(n)
+def f(i):
+    @for_range(n)
+    def f(j):
+        E[i][j] = R[i][j] + A[i][j]
+exemplars = Array(n, sint)
+@for_range(n)
+def f(i):
+    exemplars[i] = (E[i][i]>sint(0)).if_else(sint(1),sint(0))
+
+#uncomment to print cluster assignments
+#@for_range(n)
+#def f(i):
+#    print_ln('Exemplar')
+#    print_ln('%s', exemplars[i].reveal())
+    
+
+@for_range(n)
+def f(i):
+    @for_range(n)
+    def f(j):
+        exemplarEach[i] = (((exemplars[j]>sint(0)).bit_and((exemplarEach[i]>=sint(0))).bit_and(E[i][j]>E[i][exemplarEach[i].reveal()]))).bit_xor(((exemplars[j]>sint(0)).bit_and(exemplarEach[i]<sint(0)))).if_else(sint(j), exemplarEach[i])
+    #print_ln('%s', exemplarEach[i].reveal())
