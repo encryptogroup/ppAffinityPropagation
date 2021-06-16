@@ -1,6 +1,6 @@
 # ppAffinityPropagation
 
-This is the code used in the benchmarks the SECRYPT'21 paper \[[KMS+21](https://ia.cr/2021/...)\] by Hannah Keller, Helen Möllering, Thomas Schneider, and Hossein Yalame (\[[ENCRYPTO](https://www.encrypto.cs.tu-darmstadt.de/home_page/index.en.jsp)\]).
+This is the code used in the benchmarks the SECRYPT'21 paper \[[KMS+21](https://eprint.iacr.org/2021/825)\] by Hannah Keller, Helen Möllering, Thomas Schneider, and Hossein Yalame (\[[ENCRYPTO](https://www.encrypto.cs.tu-darmstadt.de/home_page/index.en.jsp)\]).
 
 The implementation uses the \[[MP-SPDZ](https://github.com/data61/MP-SPDZ)\] framework for benchmarking secure multi-party computation protocols. For simplicity, we only describe steps necessary that build upon the general MP-SPDZ setup, which is automated by the script:
 ```setup_mpspdz.sh``` 
